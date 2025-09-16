@@ -4,11 +4,11 @@ CONFIG_FILE="$HOME/.spotiblox"
 MAX_TITLE_LEN=30
 MAX_ARTIST_LEN=20
 
-# Determine if running interactively
+# running interactively?
 IS_INTERACTIVE=false
 [[ -t 0 ]] && IS_INTERACTIVE=true
 
-# Get or read ROBLOSECURITY cookie
+# get or read cookie
 get_cookie() {
     if [[ -f "$CONFIG_FILE" ]]; then
         COOKIE=$(base64 --decode "$CONFIG_FILE")
@@ -42,7 +42,7 @@ CLEARED_ONCE=false
 
 update_about_me() {
     python3 - <<END
-import requests, os
+import requests, os, re
 
 COOKIE = "$COOKIE"
 title = os.environ.get("TITLE_BASH", "")
@@ -51,26 +51,45 @@ status = os.environ.get("STATUS_BASH", "")
 position = os.environ.get("POSITION_BASH", "0")
 duration = os.environ.get("DURATION_BASH", "0")
 
+# no cusswords!!!1
+BADWORDS_URL = "https://www.cs.cmu.edu/~biglou/resources/bad-words.txt"
+try:
+    resp = requests.get(BADWORDS_URL, timeout=5)
+    resp.raise_for_status()
+    BADWORDS = [line.strip() for line in resp.text.splitlines() if line.strip()]
+except Exception:
+    BADWORDS = []
+
+def censor(text):
+    for word in BADWORDS:
+        regex = re.compile(rf"\\b{re.escape(word)}\\b", re.IGNORECASE)
+        text = regex.sub(lambda m: "*"*len(m.group()), text)
+    return text
+
 def format_time(microseconds):
     try:
-        seconds = int(float(microseconds) / 1_000_000)
+        seconds = int(float(microseconds)/1_000_000)
     except (ValueError, TypeError):
         seconds = 0
     m = seconds // 60
     s = seconds % 60
     return f"{m}:{s:02d}"
 
-# Only show timestamp when paused
+# show timestamp when paused (tried updating live but was getting rate limited)
 pos_str = format_time(position) if status.lower() == "paused" else "0:00"
 dur_str = format_time(duration)
 
-# Capitalize and truncate
-title = title.capitalize()
-artist = artist.capitalize()
+# capitalization to make it look nicer
+title = " ".join(w.capitalize() for w in title.split())
+artist = " ".join(w.capitalize() for w in artist.split())
+
 if len(title) > $MAX_TITLE_LEN:
     title = title[:$MAX_TITLE_LEN] + "…"
 if len(artist) > $MAX_ARTIST_LEN:
     artist = artist[:$MAX_ARTIST_LEN] + "…"
+
+title = censor(title)
+artist = censor(artist)
 
 session = requests.Session()
 session.cookies[".ROBLOSECURITY"] = COOKIE
@@ -79,7 +98,7 @@ try:
     token_req = session.post("https://auth.roblox.com/v2/logout")
     csrf_token = token_req.headers.get("x-csrf-token")
 except Exception:
-    csrf_token = None
+    csrf_token = ""
 
 headers = {
     "x-csrf-token": csrf_token or "",
@@ -89,14 +108,16 @@ headers = {
 }
 
 if title and artist:
-    # Play/pause symbols
-    play_symbol = "⏸" if status.lower() == "paused" else "▶"
+    # Play/pause symbols: ⏸ when playing, ▶ when paused
+    play_symbol = "⏸" if status.lower() == "playing" else "▶"
     symbols_line = f"⏮   {play_symbol}   ⏭"
+
     blurb = f"{title}\nby {artist}\n{symbols_line}\n{pos_str} / {dur_str}"
 else:
     blurb = ""
 
 data = {"description": blurb}
+
 try:
     resp = session.post("https://users.roblox.com/v1/description",
                         data=data, headers=headers)
