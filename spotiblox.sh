@@ -80,8 +80,6 @@ def format_time(microseconds):
 pos_str = format_time(position) if status.lower() == "paused" else "0:00"
 dur_str = format_time(duration)
 
-
-
 # Truncate
 if len(title) > $MAX_TITLE_LEN:
     title = title[:$MAX_TITLE_LEN] + "…"
@@ -167,7 +165,7 @@ while true; do
             update_about_me
             LAST_POSITION="$POSITION"
         fi
-else
+    else
         if [[ "$CLEARED_ONCE" = false ]]; then
             unset TITLE_BASH
             unset ARTIST_BASH
