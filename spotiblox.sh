@@ -76,8 +76,8 @@ def format_time(microseconds):
     s = seconds % 60
     return f"{m}:{s:02d}"
 
-# Always show timestamp when paused, otherwise show 0:00
-pos_str = format_time(position) if status.lower() == "paused" else "0:00"
+# Always show 0:00
+pos_str = "0:00"
 dur_str = format_time(duration)
 
 # Truncate
@@ -134,7 +134,7 @@ while true; do
         TITLE=$(playerctl -p spotify metadata xesam:title 2>/dev/null)
         ARTIST=$(playerctl -p spotify metadata xesam:artist 2>/dev/null)
         STATUS=$(playerctl -p spotify status 2>/dev/null)
-        POSITION=$(playerctl -p spotify metadata mpris:position 2>/dev/null)
+        POSITION=$(playerctl -p spotify position 2>/dev/null)
         DURATION=$(playerctl -p spotify metadata mpris:length 2>/dev/null)
 
         TRACK_ID="$TITLE|$ARTIST|$STATUS"
@@ -143,28 +143,14 @@ while true; do
             export TITLE_BASH="$TITLE"
             export ARTIST_BASH="$ARTIST"
             export STATUS_BASH="$STATUS"
-            export POSITION_BASH="$POSITION"
             export DURATION_BASH="$DURATION"
             update_about_me
             LAST_TRACK="$TRACK_ID"
             LAST_STATUS="$STATUS"
-            LAST_POSITION="$POSITION"
             CLEARED_ONCE=true
         fi
         
-        # Update timestamp every 10 seconds when playing, instantly when paused
-        if [[ "$STATUS" == "playing" ]] && [[ "$POSITION" != "$LAST_POSITION" ]]; then
-            export POSITION_BASH="$POSITION"
-            export DURATION_BASH="$DURATION"
-            update_about_me
-            LAST_POSITION="$POSITION"
-            sleep 10
-        elif [[ "$STATUS" == "paused" ]] && [[ "$POSITION" != "$LAST_POSITION" ]]; then
-            export POSITION_BASH="$POSITION"
-            export DURATION_BASH="$DURATION"
-            update_about_me
-            LAST_POSITION="$POSITION"
-        fi
+
     else
         if [[ "$CLEARED_ONCE" = false ]]; then
             unset TITLE_BASH
