@@ -47,8 +47,7 @@ pip3 install requests
 
 **Arch Linux:**
 ```bash
-sudo pacman -S playerctl python python-pip
-pip install requests
+sudo pacman -S playerctl python python-pip python-requests
 ```
 
 ### Spotify Setup
