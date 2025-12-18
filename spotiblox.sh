@@ -111,7 +111,7 @@ if title and artist:
     play_symbol = "⏸" if status.lower() == "playing" else "▶"
     symbols_line = f"⏮   {play_symbol}   ⏭"
 
-    blurb = f"{title}\nby {artist}\n{symbols_line}\n{pos_str} / {dur_str}"
+    blurb = f"{title}\nby {artist}\n{symbols_line}\n{pos_str} / {dur_str}\n\nReal time Spotify information powered by SpotiBlox\nDeveloped by DiM"
 else:
     blurb = ""
 
