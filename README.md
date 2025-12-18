@@ -8,7 +8,7 @@ Spotiblox is a bash script that monitors your Spotify playback and automatically
 
 - Current song title and artist
 - Play/pause status with visual indicators (⏸ for playing, ▶ for paused)
-- Current position and duration (updates in real-time when playing)
+- Song duration
 - Media control symbols (⏮ ⏸ ⏭)
 - Automatic profanity filtering
 - Clears the About Me section when Spotify is closed
