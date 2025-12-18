@@ -21,7 +21,6 @@ The script works by:
 2. **Processing Data**: Truncates long strings, applies profanity filtering, and formats the display
 3. **Roblox API Communication**: Uses Python to make authenticated requests to Roblox's API to update the profile description
 4. **Real-time Updates**: Continuously monitors for changes and updates the profile immediately when songs change
-5. **Smart Position Tracking**: Updates timestamp every 10 seconds when playing, instantly when paused
 
 ## Requirements
 
